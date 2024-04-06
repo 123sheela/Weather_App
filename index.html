@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Weather App</title>
+</head>
+<body>
+    
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter city Name" spellcheck="false">
+            <button><img src="img/search.png"></button>
+        </div>
+
+        <!-- the error message for whenever the user entered the wrong city name -->
+        <div class="error">Invalid City Name</div>
+        <!-- weather information will be displayed here -->
+        <div class="weather">
+            <img src="img/weather.png" class="Weather-icon">
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">NewYork</h2>
+
+            <div class="details">
+                <div class="col">
+                    <img src="img/humidity.png" >
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="img/windspeed.png" >
+                    <div>
+                        <p class="wind">15km/hr</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+       <!-- javascript -->
+<script>
+    const apikey = "66c6663781ab5dad291765a7733230de";
+    const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+    const searchBox = document.querySelector(".search input");
+    const searchBtn = document.querySelector(".search button");
+    const weatherIcon = document.querySelector(".Weather-icon");
+
+    searchBtn.addEventListener("click", () => {
+        const city = searchBox.value.trim();
+        if (city) {
+            getWeather(city);
+        } else {
+            showError("Please enter a city name");
+        }
+    });
+
+    async function getWeather(city) {
+        try {
+            const response = await fetch(`${apiUrl}${city}&appid=${apikey}`);
+            const data = await response.json();
+
+            if (response.status === 404) {
+                showError("City not found");
+                hideWeather();
+            } else {
+                displayWeather(data);
+            }
+        } catch (error) {
+            console.error("Error fetching weather data:", error);
+            showError("Failed to fetch weather data");
+            hideWeather();
+        }
+    }
+
+    function displayWeather(data) {
+
+        const cityNameElement = document.querySelector(".city");
+        const tempElement = document.querySelector(".temp");
+        const humidityElement = document.querySelector(".humidity");
+        const windElement = document.querySelector(".wind");
+
+
+        document.querySelector(".city").textContent = data.name;
+        document.querySelector(".temp").textContent = `${Math.round(data.main.temp)}°C`;
+        document.querySelector(".humidity").textContent = `${data.main.humidity}%`;
+        document.querySelector(".wind").textContent = `${data.wind.speed} Km/hr`;
+
+        const weatherMain = data.weather[0].main.toLowerCase();
+        updateWeatherIcon(weatherMain);
+
+        showWeather();
+    }
+
+    function updateWeatherIcon(weatherMain) {
+    const iconMap = {
+        "clouds": "img/clouds.png",
+        "clear": "img/sun.png",
+        "rain": "img/rain.png",
+        "drizzle": "img/drizzle.png",
+        "mist": "img/mist.png",
+        "snow": "img/snow.png"
+    };
+
+        const defaultIcon = "img/weather.png";
+        const iconSrc = iconMap[weatherMain] || defaultIcon;
+        weatherIcon.src = iconSrc;
+    }
+
+
+    function showError(message) {
+        const errorElement = document.querySelector(".error");
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+    }
+
+    function hideWeather() {
+        const weatherElement = document.querySelector(".weather");
+        weatherElement.style.display = "none";
+    }
+
+    function showWeather() {
+        const errorElement = document.querySelector(".error");
+        errorElement.style.display = "none";
+
+        const weatherElement = document.querySelector(".weather");
+        weatherElement.style.display = "block";
+    }
+ 
+</script>
+</body>
+</html>
